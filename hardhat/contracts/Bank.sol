@@ -65,7 +65,7 @@ contract Bank {
      * @param amount - amount of tokens to deposit.
      * @param symbol- The symbol of the token e.g: BTC - Bitcoin.
      */
-    function depositTokens(uint256 amount, bytes32 symbol) external {
+    function depositTokens(uint256 amount, bytes32 symbol) payable external {
         // Increment the balances for the sender address.
         balances[msg.sender][symbol] += msg.value;
 
@@ -97,11 +97,12 @@ contract Bank {
         require(balances[msg.sender]['ETH'] >= amount, "Insufficient Balance");
 
         balances[msg.sender]['ETH'] -= amount;
-        payable(msg.sender).call{value: amount}("");
+        (bool sent, ) = payable(msg.sender).call{value: amount}("");
+        require(sent, "Failed to send Ether");
     }
 
     // Allow us to receive ETH sent to the contract.
-    receive() external {
+    receive() payable external {
         // Increment the balances for the sender address.
         balances[msg.sender]['ETH'] += msg.value;
     }
